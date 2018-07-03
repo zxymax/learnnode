@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h1>Node</h1>
+	<p>
+		<strong>概念：</strong>
+		Node.js的是建立在Chrome的JavaScript的运行时，可方便地构建快速，可扩展的网络应用程序的平台。Node.js使用事件驱动，非阻塞I/O模型，轻量、高效，可以完美地处理时时数据，运行在不同的设备上。
+	</p>
+	<p>
+		<strong>特点：</strong>
+	</p>
+	<pre>
+	 1. 它是一个Javascript运行环境
+　　2. 依赖于Chrome V8引擎进行代码解释
+　　3. 事件驱动
+　　4. 非阻塞I/O
+　　5. 轻量、可伸缩，适于实时数据交互应用
+　　6. 单进程，单线程
+	</pre>
+	<p>
+		<strong>node解决了那些问题：</strong>
+	</p>
+
+	<pre>
+		1.高并发问题，指的是在同一时间并发访问服务器
+		2.I/O 密集场景有明显的性能优势
+	</pre>
+	<p>
+		<strong>优点：</strong>
+	</p>
+	<pre>
+		1.采用事件驱动，异步编程，为网络服务而设计
+		2.高并发
+		3.适合I/O 密集型应用
+	</pre>
+	<p><strong>缺点：</strong></p>
+	<pre>
+　　1. 不适合CPU密集型应用；CPU密集型应用给Node带来的挑战主要是：由于JavaScript单线程的原因，如果有长时间运行的计算（比如大循环），将会导致CPU时间片不能释放，使得后续I/O无法发起；
+　　　　解决方案：分解大型运算任务为多个小任务，使得运算能够适时释放，不阻塞I/O调用的发起；
+　　2. 只支持单核CPU，不能充分利用CPU
+　　3. 可靠性低，一旦代码某个环节崩溃，整个系统都崩溃
+　　　　原因：单进程，单线程
+　　　　解决方案：（1）Nnigx反向代理，负载均衡，开多个进程，绑定多个端口；
+　　　　　　　　　（2）开多个进程监听同一个端口，使用cluster模块；
+　　4. 开源组件库质量参差不齐，更新快，向下不兼容
+　　5. Debug不方便，错误没有stack trace
+	</pre>
+	<p>
+		<strong>适合nodejs的场景</strong>
+	</p>
+	<pre>
+		1. RESTful API
+		2. 统一Web应用的UI层
+		3. 大量Ajax请求的应用　　
+	</pre>
+	<hr>
+	<h1>http模块</h1>	
+	<pre>
+	 request 请求
+	 response 响应
+
+	 request.method	// 请求的方法
+	 request.url	// 请求的url地址
+	 request.headers	// 获取请求头
+	 response.statusCode = 200	// 设置状态码
+
+	 response.setHeader('Content-Type', 'text/html;charset:utf8')
+	 response.setHeader('name', 'zxy')	// 设置响应头
+
+	 <h2>mime模块的作用： 根据文件的后缀，获取它对应的Content-Type 内容类型</h2>
+
+	 global	== window 	全局对象
+	 module 	当前模块对象
+	 export 导出对象
+	 require 加载模块方法
+	 __dirname 当前模块所在目录的绝对路径
+	 __filename 当前模块的绝对路径
+
+	 <code>
+	 	http.createServer((req, res)=>{
+	let urlObj = url.parse(req.url, true) // 加参数true 表示query转成对象
+	console.log(urlObj.query,urlObj.query.name,urlObj.query.city)	
+	console.log('------------------------')
+	console.log(urlObj.pathname)
+	res.end()
+}).listen(3000, '127.0.0.1')
+	 </code>
+
+	 <strong>nexttick</strong>排到下个事件的顶部
+
+		<h1>
+			Buffer操作
+		</h1>
+			<ul>
+				<li>Buffer和字符串长度</li>
+				<li>Buffer和字符串转换</li>
+				<li>Buffer和数值对象转换</li>
+				<li>复制Buffer :
+					&nbsp;&nbsp;&nbsp;&nbsp;<p>buf.copy(targetBuffer,[targetStart],[sourceStart],[sourceEnd])</p>
+					<code>
+						// eg:
+						let srcBuf = new Buffer([4,5,6])
+						let tarBuf = new Buffer(6)
+						tarBuf[0]=1
+						tarBuf[1]=2
+						tarBuf[2]=3
+						srcBuf.copy(tarBuf,3,0,3)	//  Buffer 01 02 03 04 05 06
+					</code>
+					<code>
+						let buf = new Buffer(2)
+						buf[0] = -10
+						buf[1] =260
+						
+						//如果大于255，会对256取模，如果小于0，先模上256，再加上256
+					</code>
+				</li>
+			</ul>
+			<p>
+				nodejs中 <strong>流的概念</strong>
+			</p>
+			流是一组有序的，有起点和终点的字节数据传输手段
+			不关心文件的整体内容，只关注是否从文件中读到了数据，以及读到数据之后的处理
+			流是一个抽象接口，被node中的很多对象所实现，比如对一个http服务器的请求对象request是一个流，stdout也是一个流。
+			<em>几乎所有node程序，无论多么简单，就在某种途径用到了流</em>
+
+			<h3>如何切换到流动模式</h3>
+			添加一个data事件处理器来监听数据。
+			调用resume()方法来明确开启数据流。
+			调用pipe()方法将数据发送到一个Writable可写流。
+			<h3>切换回暂停模式</h3>
+			如果没有导流目标，调用pause()方法。
+			如果有导流目标，移除所有data事件处理器，调用unnine()
+			方法移除所有导流目标
+	</pre>
+</body>
+</html>
